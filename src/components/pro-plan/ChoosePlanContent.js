@@ -653,7 +653,7 @@ const ChoosePlanContent = ({
           </Typography>
           <Stack direction="row" alignItems="baseline" spacing={0.5}>
             <Typography fontSize="28px" fontWeight={800} color="text.primary">
-              ${selectedPlan.price.toFixed(2)}
+              {getAmountWithSign(selectedPlan.price)}
             </Typography>
             <Typography fontSize="12px" color="text.secondary">
               / {selectedPlan.days} {t("days")}
