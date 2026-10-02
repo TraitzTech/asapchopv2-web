@@ -30,10 +30,10 @@ it to `traitz-prod-01` (2.24.162.111) and restarts the `asapchop-web` service. n
    `/opt/traitz/apps/asapchop-web/.ssh/authorized_keys` (dir 700, file 600, owned by `asapchop-web`).
 7. GitHub repo → Settings → Environments → `production`:
    - Secrets: `PROD_SSH_KEY` (private key), `PROD_KNOWN_HOSTS` (`ssh-keyscan -p 22 2.24.162.111`)
-   - Variables: `NEXT_PUBLIC_BASE_URL`, `NEXT_CLIENT_HOST_URL`, `NEXT_PUBLIC_GOOGLE_MAP_KEY`, `NEXT_PUBLIC_SITE_VERSION`
+   - Variables: `NEXT_PUBLIC_BASE_URL`, `NEXT_CLIENT_HOST_URL`, `NEXT_PUBLIC_GOOGLE_MAP_KEY`, `NEXT_PUBLIC_GOOGLE_CLIENT_ID`, `NEXT_PUBLIC_SITE_VERSION`
    - Deployment branches: `main` only
 8. DNS: `A app → 2.24.162.111`.
-9. nginx: copy `app.asapchop.com.nginx.conf` to `/etc/nginx/sites-available/app.asapchop.com`, symlink into
+9. nginx: copy `app.asapchop.com.nginx.conf` to `/etc/nginx/sites-available/asapchop-web`, symlink into
    `sites-enabled`, `sudo nginx -t && sudo systemctl reload nginx`, then
    `sudo certbot --nginx -d app.asapchop.com`.
 
