@@ -1,5 +1,11 @@
 const nextConfig = {
   reactStrictMode: true,
+  // Self-contained server bundle (.next/standalone) for the VPS deploy; see deploy/README.md
+  output: 'standalone',
+  // Tracing only copies @swc/helpers/cjs, but the server also loads its esm build at startup.
+  outputFileTracingIncludes: {
+    '/*': ['./node_modules/@swc/helpers/esm/**/*'],
+  },
   // Hide Next.js dev-mode indicator (bottom-left "N" badge)
   devIndicators: {
     buildActivity: false,

@@ -1,0 +1,132 @@
+name: Deploy to app.asapchop.com (production)
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+concurrency:
+  group: deploy-production
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment:
+      name: production
+      url: https://app.asapchop.com
+
+    # VPS traitz-prod-01. Connection details aren't secret (only the private key is), so they live
+    # here where typos are visible in the logs. The app runs as its own `asapchop-web` user under
+    # systemd (deploy/asapchop-web.service); each deploy is a new folder in releases/ and `current`
+    # is a symlink to the live one, so a bad release can be rolled back by moving the symlink.
+    env:
+      SSH_HOST: 2.24.162.111
+      SSH_PORT: 22
+      SSH_USER: asapchop-web
+      APP_DIR: /opt/traitz/apps/asapchop-web
+      APP_PORT: 3100
+      KEEP_RELEASES: 5
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: yarn
+
+      - name: Install dependencies
+        run: yarn install --frozen-lockfile --non-interactive
+
+      - name: Build
+        # NEXT_PUBLIC_* values are baked into the browser bundle at build time, so they come from
+        # the `production` environment's variables in GitHub, not from the server.
+        env:
+          NEXT_PUBLIC_BASE_URL: ${{ vars.NEXT_PUBLIC_BASE_URL }}
+          NEXT_CLIENT_HOST_URL: ${{ vars.NEXT_CLIENT_HOST_URL }}
+          NEXT_PUBLIC_GOOGLE_MAP_KEY: ${{ vars.NEXT_PUBLIC_GOOGLE_MAP_KEY }}
+          NEXT_PUBLIC_SITE_VERSION: ${{ vars.NEXT_PUBLIC_SITE_VERSION }}
+          NEXT_TELEMETRY_DISABLED: 1
+        run: |
+          [ -n "$NEXT_PUBLIC_BASE_URL" ] || { echo "::error::Variable NEXT_PUBLIC_BASE_URL is not set on the production environment"; exit 1; }
+          [ -n "$NEXT_CLIENT_HOST_URL" ] || { echo "::error::Variable NEXT_CLIENT_HOST_URL is not set on the production environment"; exit 1; }
+          echo "API: $NEXT_PUBLIC_BASE_URL  Site: $NEXT_CLIENT_HOST_URL"
+          yarn build
+
+      - name: Package release
+        # The standalone server doesn't include public/ or the static chunks; they're copied in.
+        run: |
+          cp -r public .next/standalone/public
+          cp -r .next/static .next/standalone/.next/static
+          tar -czf release.tar.gz -C .next/standalone .
+          ls -lh release.tar.gz
+
+      - name: Configure SSH
+        # The server's host key is pinned in PROD_KNOWN_HOSTS (no trust-on-first-use), so a
+        # runner can never be tricked into uploading the release to an impostor.
+        env:
+          SSH_KEY: ${{ secrets.PROD_SSH_KEY }}
+          KNOWN_HOSTS: ${{ secrets.PROD_KNOWN_HOSTS }}
+        run: |
+          [ -n "$SSH_KEY" ] || { echo "::error::PROD_SSH_KEY secret is missing"; exit 1; }
+          [ -n "$KNOWN_HOSTS" ] || { echo "::error::PROD_KNOWN_HOSTS secret is missing"; exit 1; }
+          echo "Deploying to $SSH_USER@$SSH_HOST:$SSH_PORT -> $APP_DIR"
+
+          mkdir -p ~/.ssh
+          printf '%s\n' "$SSH_KEY" | tr -d '\r' > ~/.ssh/id_deploy
+          chmod 600 ~/.ssh/id_deploy
+          printf '%s\n' "$KNOWN_HOSTS" | tr -d '\r' > ~/.ssh/known_hosts
+
+          printf 'Host deploy-target\n  HostName %s\n  Port %s\n  User %s\n  IdentityFile ~/.ssh/id_deploy\n  IdentitiesOnly yes\n  StrictHostKeyChecking yes\n  ConnectTimeout 30\n  ServerAliveInterval 30\n' \
+            "$SSH_HOST" "$SSH_PORT" "$SSH_USER" > ~/.ssh/config
+
+          ssh -o BatchMode=yes deploy-target true
+
+      - name: Upload release
+        run: |
+          RELEASE="$(date -u +%Y%m%d%H%M%S)-${GITHUB_SHA::7}"
+          echo "RELEASE=$RELEASE" >> "$GITHUB_ENV"
+          ssh deploy-target "test -d '$APP_DIR/releases'" || {
+            echo "::error::$APP_DIR/releases doesn't exist. Finish the server setup (deploy/README.md) first."
+            exit 1
+          }
+          ssh deploy-target "mkdir '$APP_DIR/releases/$RELEASE'"
+          ssh deploy-target "tar -xzf - -C '$APP_DIR/releases/$RELEASE'" < release.tar.gz
+
+      - name: Activate release
+        # Switch the symlink, restart, and check the server answers. If it doesn't, put the
+        # previous release back so the site stays up.
+        run: |
+          ssh deploy-target bash -se <<EOF
+          set -e
+          cd "$APP_DIR"
+          PREVIOUS="\$(readlink current || true)"
+
+          ln -sfn "releases/$RELEASE" current.tmp
+          mv -T current.tmp current
+          sudo /usr/bin/systemctl restart asapchop-web
+
+          for i in \$(seq 1 30); do
+            if curl -fsS -o /dev/null "http://127.0.0.1:$APP_PORT/favicon.ico"; then
+              echo "Release $RELEASE is live."
+              break
+            fi
+            sleep 2
+          done
+
+          if ! curl -fsS -o /dev/null "http://127.0.0.1:$APP_PORT/favicon.ico"; then
+            echo "::error::New release didn't come up on port $APP_PORT."
+            journalctl -u asapchop-web -n 40 --no-pager || true
+            if [ -n "\$PREVIOUS" ]; then
+              echo "Rolling back to \$PREVIOUS"
+              ln -sfn "\$PREVIOUS" current.tmp
+              mv -T current.tmp current
+              sudo /usr/bin/systemctl restart asapchop-web
+            fi
+            exit 1
+          fi
+
+          # Keep the newest few releases for manual rollback.
+          ls -1d releases/*/ | sort | head -n -$KEEP_RELEASES | xargs -r rm -rf
+          EOF
