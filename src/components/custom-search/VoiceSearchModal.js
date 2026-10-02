@@ -15,13 +15,13 @@ import { t } from "i18next";
 
 const pulse = keyframes`
   0% {
-    box-shadow: 0 0 0 0 ${alpha("#00B562", 0.4)};
+    box-shadow: 0 0 0 0 ${alpha("#FF8227", 0.4)};
   }
   70% {
-    box-shadow: 0 0 0 20px ${alpha("#00B562", 0)};
+    box-shadow: 0 0 0 20px ${alpha("#FF8227", 0)};
   }
   100% {
-    box-shadow: 0 0 0 0 ${alpha("#00B562", 0)};
+    box-shadow: 0 0 0 0 ${alpha("#FF8227", 0)};
   }
 `;
 

@@ -10,7 +10,7 @@ export const HowItWorksPoints = styled(Stack)(({ theme }) => ({
 }));
 export const CustopmChip = styled(Chip)(({ theme }) => ({
     backgroundColor: `${theme.palette.neutral[100]} !important`,
-    boxShadow: "0px 3px 6px 0px rgba(3, 157, 85, 0.10);"
+    boxShadow: "0px 3px 6px 0px rgba(255, 121, 24, 0.10);"
 }));
 
 const HowItWorks = ({configData}) => {
