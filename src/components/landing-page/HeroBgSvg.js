@@ -19,7 +19,7 @@ const HeroBgSvg = () => {
         width="1240"
         height="504"
       >
-        <rect width="1240" height="504" rx="20" fill="#E9F5EE" />
+        <rect width="1240" height="504" rx="20" fill="#FDF3EC" />
       </mask>
       <g mask="url(#mask0_472_1558)">
         <rect

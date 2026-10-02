@@ -35,31 +35,31 @@ const background = {
 const divider = "#E6E8F0";
 
 const primary = {
-  main: "#039D55",
-  deep: "#026034",
-  light: "#EBFDF2",
-  dark: "#1c6641",
-  semiLight: "#E4FFF3",
+  main: "#FF7918",
+  deep: "#C25400",
+  light: "#FFF2E8",
+  dark: "#D95F00",
+  semiLight: "#FFEBDC",
   contrastText: "#FFFFFF",
-  customType1: "#0DCB72",
-  customType2: "#3BB77E",
-  customType3: "#29CE00",
+  customType1: "#FF8F3F",
+  customType2: "#FF9A52",
+  customType3: "#FF8A2E",
   overLay: "#000000",
-  lite: "rgba(3, 157, 85, 0.1)",
-  icon: "#039D55",
+  lite: "rgba(255, 121, 24, 0.1)",
+  icon: "#FF7918",
 };
 const moduleTheme = {
-  pharmacy: "#039D55",
-  ecommerce: "#039D55",
-  food: "#039D55",
-  parcel: "#039D55",
+  pharmacy: "#FF7918",
+  ecommerce: "#FF7918",
+  food: "#FF7918",
+  parcel: "#FF7918",
 };
-const horizontalCardBG = "#E4FFF3";
+const horizontalCardBG = "#FFEBDC";
 
 const secondary = {
-  main: "#10B981",
-  light: "#3FC79A",
-  dark: "#0B815A",
+  main: "#FF8F3F",
+  light: "#FFAA6B",
+  dark: "#D95F00",
   contrastText: "#FFFFFF",
 };
 
@@ -118,9 +118,9 @@ const text = {
 };
 
 const footer = {
-  inputButton: "#BBFFDF",
-  inputButtonHover: "#6dcfa6",
-  bottom: "rgba(0, 98, 52, 0.3)",
+  inputButton: "#FFD8BC",
+  inputButtonHover: "#FFAA6B",
+  bottom: "rgba(194, 84, 0, 0.3)",
   foodBottom: "#686B78",
   appDownloadButtonBg: "#1A1A1A",
   appDownloadButtonBgGray: "#3E594D",

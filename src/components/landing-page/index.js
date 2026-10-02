@@ -88,7 +88,7 @@ const LandingPage = ({ configData, landingPageData }) => {
           </Box>
         ) : null}
         {landingPageData?.user_app_download_section?.download_user_app_section_status === 1 ? (
-          <Box sx={{ background: "linear-gradient(1.02deg, rgba(3, 157, 85, 0.1) -12.87%, rgba(3, 157, 85, 0.02) 99.13%)" }}>
+          <Box sx={{ background: "linear-gradient(1.02deg, rgba(255, 121, 24, 0.1) -12.87%, rgba(255, 121, 24, 0.02) 99.13%)" }}>
             <ComponentTwo
               user_app_download_section={landingPageData?.user_app_download_section}
             />
@@ -138,7 +138,7 @@ const LandingPage = ({ configData, landingPageData }) => {
 
         </Box>
         {landingPageData?.gallery_section ? (
-          <Box sx={{ background: "linear-gradient(1.02deg, rgba(3, 157, 85, 0.1) -12.87%, rgba(3, 157, 85, 0.02) 99.13%)" }}>
+          <Box sx={{ background: "linear-gradient(1.02deg, rgba(255, 121, 24, 0.1) -12.87%, rgba(255, 121, 24, 0.02) 99.13%)" }}>
             <GallerySection gallery_section={landingPageData?.gallery_section} />
           </Box>
         ) : null}

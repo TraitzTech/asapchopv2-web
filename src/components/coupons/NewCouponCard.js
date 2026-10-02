@@ -383,7 +383,7 @@ const NewCouponCard = ({ coupon, setCopy, copy, onApply }) => {
             overflow: "hidden",
             flexShrink: 0,
             cursor: "pointer",
-            color: copy === coupon?.code ? "#039d55" : titleColor,
+            color: copy === coupon?.code ? "#FF7918" : titleColor,
           }}
         >
           <i

@@ -27,7 +27,7 @@ const AnimatedContainer = styled(Box, {
   bottom: { xs: 100, md: 40 },
   cursor: "pointer",
   zIndex: 999,
-  boxShadow: "0px 10px 30px 0px rgba(3, 157, 85, 0.24)",
+  boxShadow: "0px 10px 30px 0px rgba(255, 121, 24, 0.24)",
   display: "flex",
   flexDirection: "row",
   alignItems: "center",

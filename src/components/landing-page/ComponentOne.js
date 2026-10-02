@@ -22,7 +22,7 @@ export const CustomButton = styled(Button)(({ theme }) => ({
     backgroundColor: theme.palette.primary.main,
     height: "45px",
     borderRadius: "30px",
-    boxShadow: "0px 4px 60px rgba(3, 157, 85, 0.2)",
+    boxShadow: "0px 4px 60px rgba(255, 121, 24, 0.2)",
     color: theme.palette.whiteContainer.main,
     display: "flex",
     alignItems: "center",
