@@ -1,0 +1,30 @@
+# /etc/systemd/system/asapchop-web.service
+# Customer web app (Next.js standalone) for app.asapchop.com. nginx proxies to 127.0.0.1:3100.
+[Unit]
+Description=asapchop customer web (Next.js) - app.asapchop.com
+After=network.target
+
+[Service]
+Type=simple
+User=asapchop-web
+Group=asapchop-web
+# `current` is a symlink to the live release; it's resolved again on every restart.
+WorkingDirectory=/opt/traitz/apps/asapchop-web/current
+Environment=NODE_ENV=production
+Environment=PORT=3100
+Environment=HOSTNAME=127.0.0.1
+Environment=NEXT_TELEMETRY_DISABLED=1
+# Server-side values (getServerSideProps / _document read NEXT_CLIENT_HOST_URL at runtime).
+EnvironmentFile=/opt/traitz/apps/asapchop-web/shared/runtime.env
+ExecStart=/usr/bin/node server.js
+Restart=always
+RestartSec=5
+MemoryMax=1G
+
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=full
+ProtectHome=true
+
+[Install]
+WantedBy=multi-user.target

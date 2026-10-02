@@ -45,5 +45,6 @@ next-env.d.ts
 CLAUDE.md
 .CLAUDE.md
 .claude/
-CLAUDE.md.env.development
+CLAUDE.md
+.env.development
 .env.production

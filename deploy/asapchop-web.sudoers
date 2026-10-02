@@ -1,0 +1,3 @@
+# /etc/sudoers.d/asapchop-web  (install with: sudo visudo -cf <file> first)
+# The deploy user may restart its own service and nothing else.
+asapchop-web ALL=(root) NOPASSWD: /usr/bin/systemctl restart asapchop-web
