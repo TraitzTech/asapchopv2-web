@@ -4,6 +4,7 @@ import { updateDestinationLocations } from "components/home/module-wise-componen
 
 export const formattedDate = (isoString) => {
   const date = new Date(isoString);
+  if (!isoString || Number.isNaN(date.getTime())) return "";
   const updatedDate = new Date(date.getTime()); // Add 6 hours
 
   const pad = (num) => num.toString().padStart(2, '0');

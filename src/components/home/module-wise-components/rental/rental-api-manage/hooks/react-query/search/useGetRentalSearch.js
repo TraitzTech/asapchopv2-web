@@ -25,14 +25,14 @@ const getSearch = async (pageParams) => {
     pickup_location,
     pageParam,
   } = pageParams;
+  // Before a pickup time is picked callers pass "Invalid Date"; the API needs an empty value then.
+  const validDate = date && !Number.isNaN(new Date(date).getTime()) ? date : "";
   const { data } = await MainApi.get(
     `${api_endpoint}?name=${name}&top_rated=${
       top_rated || ""
-    }&pickup_location=${api_endpoint==="/api/v1/rental/vehicle/get-provider-vehicles" ? "" : pickup_location }&date=${
-      date || ""
-    }&provider_id=${provider_id || ""}&trip_type=${
+    }&pickup_location=${api_endpoint==="/api/v1/rental/vehicle/get-provider-vehicles" ? "" : pickup_location }&date=${validDate}&provider_id=${provider_id || ""}&trip_type=${
       tripType ?tripType: "distance_wise"
-    }&duration=${duration}&sortby_price=${sort_by}&min_price=${min_price}&max_price=${max_price}&category_ids=[${category_ids}]&brand_ids=[${brand_ids}]&seating_capacity=${encodeURIComponent(
+    }&duration=${duration ?? ""}&sortby_price=${sort_by}&min_price=${min_price}&max_price=${max_price}&category_ids=[${category_ids}]&brand_ids=[${brand_ids}]&seating_capacity=${encodeURIComponent(
       JSON.stringify(seating_capacity)
     )}&air_condition=${air_condition}&no_air_condition=${no_air_condition}&offset=${
       pageParam ? pageParam : offset

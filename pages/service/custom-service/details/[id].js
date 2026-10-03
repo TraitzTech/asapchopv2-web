@@ -22,7 +22,7 @@ const CustomServiceDetailsPage = () => {
 
   useEffect(() => {
     if (!getToken()) {
-      router.replace("/auth/sign-in");
+      router.replace({ pathname: "/home", query: { from: "custom-service" } }); // no /auth/sign-in page
     }
   }, []);
 
