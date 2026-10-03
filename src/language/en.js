@@ -2619,5 +2619,7 @@ export const english = {
   "Your budget": "Your budget",
   "Your budget (optional)": "Your budget (optional)",
   "bookings scheduled": "bookings scheduled",
-  "by": "by"
+  "by": "by",
+  "Ride booking is available in the Asapchop app. The download link is coming soon.": "Ride booking is available in the Asapchop app. The download link is coming soon.",
+  "Rider sign-up is available in the Asapchop rider app. The download link is coming soon.": "Rider sign-up is available in the Asapchop rider app. The download link is coming soon."
 };
