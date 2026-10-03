@@ -2,6 +2,7 @@ import { Box, Stack, Typography } from "@mui/material";
 import CustomImageContainer from "components/CustomImageContainer";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
+import toast from "react-hot-toast";
 import avatar1 from "./asset/avatar1.jpg";
 import avatar2 from "./asset/avatar2.jpg";
 import avatar3 from "./asset/avatar3.jpg";
@@ -16,7 +17,7 @@ const SOCIAL_AVATARS = [
 
 const TABS = [
   { id: "customer", labelKey: "I'm a Customer" },
-  { id: "rider", labelKey: "I'am a Rider" },
+  { id: "rider", labelKey: "I'm a Rider" },
 ];
 
 const getPointsData = (pointsData) => {
@@ -25,7 +26,6 @@ const getPointsData = (pointsData) => {
 };
 
 const RideShareIntroBanner = ({ configData, appUrl }) => {
-  console.log({ appUrl });
   const customerData =
     configData?.react_ride_share_page?.customer?.hero_section || {};
   const riderData =
@@ -43,35 +43,38 @@ const RideShareIntroBanner = ({ configData, appUrl }) => {
 
   const heroData = activeTab === "customer" ? customerData : riderData;
 
+  // Ride booking and rider sign-up happen in the mobile apps, so the CTA opens the right store:
+  // the customer app for "Take A Ride", the rider app for "Join As Rider".
+  const storeLinks =
+    activeTab === "customer"
+      ? { android: configData?.app_url_android, ios: configData?.app_url_ios }
+      : appUrl;
+
   const handleAppUrlClick = () => {
     if (typeof window === "undefined") return;
 
     const ua = navigator.userAgent || navigator.vendor || "";
     const isIos = /iphone|ipad|ipod/i.test(ua);
     const isAndroid = /android/i.test(ua);
+    const url = isIos
+      ? storeLinks?.ios || storeLinks?.android
+      : storeLinks?.android || storeLinks?.ios;
 
-    if (isAndroid) {
-      const fallback = encodeURIComponent(appUrl?.android ?? "");
-      window.location.href = `intent://open/#Intent;package=com.sixamtech.sixam_mart_user;S.browser_fallback_url=${fallback};end`;
-    } else if (isIos) {
-      let appOpened = false;
-      const onVisibilityChange = () => {
-        if (document.hidden) appOpened = true;
-      };
-      document.addEventListener("visibilitychange", onVisibilityChange);
-
-      window.location.href = window.location.origin;
-
-      setTimeout(() => {
-        document.removeEventListener("visibilitychange", onVisibilityChange);
-        if (!appOpened && appUrl?.ios) {
-          window.location.href = appUrl.ios;
-        }
-      }, 2500);
+    if (!url) {
+      toast(
+        t(
+          activeTab === "customer"
+            ? "Ride booking is available in the Asapchop app. The download link is coming soon."
+            : "Rider sign-up is available in the Asapchop rider app. The download link is coming soon."
+        )
+      );
+      return;
+    }
+    // Phones open the store page directly (the store app takes over); desktop opens a new tab.
+    if (isIos || isAndroid) {
+      window.location.href = url;
     } else {
-      // Desktop: store link directly open
-      const url = appUrl?.ios ?? appUrl?.android;
-      if (url) window.open(url, "_blank", "noopener,noreferrer");
+      window.open(url, "_blank", "noopener,noreferrer");
     }
   };
 

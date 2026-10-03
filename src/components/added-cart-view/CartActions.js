@@ -6,6 +6,7 @@ import { useTranslation } from "react-i18next";
 import { useRouter } from "next/router";
 import { useDispatch, useSelector } from "react-redux";
 import { setClearCart } from "redux/slices/cart";
+import { getCurrentModuleType } from "helper-functions/getCurrentModuleType";
 import GuestCheckoutModal from "../cards/GuestCheckoutModal";
 import dynamic from "next/dynamic";
 const AuthModal = dynamic(() => import("components/auth/AuthModal"));
@@ -21,7 +22,11 @@ const CartActions = (props) => {
   const router = useRouter();
   const dispatch = useDispatch();
 
-  const checkoutStoreId = cartList?.[0]?.store_id;
+  // Service bookings have their own checkout; their cart rows carry the provider on `service`.
+  const isService = getCurrentModuleType() === "service";
+  const checkoutPath = isService ? "/service/checkout" : "/checkout";
+  const checkoutStoreId =
+    cartList?.[0]?.store_id ?? cartList?.[0]?.service?.store_id;
   const moduleParam = router.query?.module;
   const checkoutQuery = {
     page: "cart",
@@ -31,7 +36,7 @@ const CartActions = (props) => {
 
   const handleRoute = () => {
     router
-      .push({ pathname: "/checkout", query: checkoutQuery }, undefined, {
+      .push({ pathname: checkoutPath, query: checkoutQuery }, undefined, {
         shallow: true,
       })
       .then(() => {
@@ -47,7 +52,7 @@ const CartActions = (props) => {
       setOpen(true);
     } else if (cartList?.length > 0 && token) {
       router
-        .push({ pathname: "/checkout", query: checkoutQuery }, undefined, {
+        .push({ pathname: checkoutPath, query: checkoutQuery }, undefined, {
           shallow: true,
         })
         .then(() => {
