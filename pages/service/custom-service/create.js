@@ -26,8 +26,9 @@ const CreateCustomServicePage = () => {
   }, []);
 
   useEffect(() => {
+    // There is no /auth/sign-in page; like AuthGuard, send visitors home where sign-in opens.
     if (!getToken()) {
-      router.replace("/auth/sign-in");
+      router.replace({ pathname: "/home", query: { from: "custom-service" } });
     }
   }, []);
 
