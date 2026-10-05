@@ -25,12 +25,22 @@ import { useEffect } from "react";
 import ModuleChecker from "../src/components/module-select/ModuleChecker";
 import ProSubscriptionExpiredModal from "../src/components/pro-plan/ProSubscriptionExpiredModal";
 import App from "next/app";
+import {
+  readLocationFromUrl,
+  storeLocation,
+  urlWithoutLocationParams,
+} from "../src/utils/landingLocation";
 
 Router.events.on("routeChangeStart", nProgress.start);
 Router.events.on("routeChangeError", nProgress.done);
 Router.events.on("routeChangeComplete", nProgress.done);
 
 export const currentVersion = process.env.NEXT_PUBLIC_SITE_VERSION;
+
+// A location handed over by the landing page is stored before anything renders,
+// so the first API calls already carry the zone.
+const landingLocation = readLocationFromUrl();
+storeLocation(landingLocation);
 const clientSideEmotionCache = createEmotionCache();
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -66,6 +76,14 @@ function MyApp(props) {
         localStorage.setItem("settings", storedSettings);
       }
       localStorage.setItem("appVersion", currentVersion);
+      storeLocation(landingLocation);
+    }
+  }, []);
+
+  // Drop the handed-over location from the address bar once it is stored.
+  useEffect(() => {
+    if (landingLocation) {
+      Router.replace(urlWithoutLocationParams(), undefined, { shallow: true });
     }
   }, []);
 
