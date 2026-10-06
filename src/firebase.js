@@ -20,8 +20,10 @@ const firebaseConfig = {
   measurementId: process.env.NEXT_PUBLIC_FIREBASE_MEASUREMENT_ID || "G-Y2CERPY1KV",
 };
 
-// Web push key from Firebase console > Project settings > Cloud Messaging > Web Push certificates.
-const vapidKey = process.env.NEXT_PUBLIC_FIREBASE_VAPID_KEY || "";
+// Public web push key (Firebase console > Project settings > Cloud Messaging > Web Push certificates).
+const vapidKey =
+  process.env.NEXT_PUBLIC_FIREBASE_VAPID_KEY ||
+  "BPAdXyg1eKvc-z9XgV_fCLh9Q0Qo_acJ7GwtUcQDC8KxnAnoEd5tSVTFoGRVTNjD1xbIkG3mbfwH-igH8D0jb7I";
 
 const firebaseApp = !getApps().length
   ? initializeApp(firebaseConfig)
