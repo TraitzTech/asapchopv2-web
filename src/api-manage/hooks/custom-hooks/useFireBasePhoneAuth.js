@@ -24,7 +24,11 @@ const useFirebasePhoneAuth = () => {
         }
       );
     } else {
-      window.recaptchaVerifier?.clear();
+      // Resending: drop the old verifier first, otherwise this branch calls itself forever.
+      try {
+        window.recaptchaVerifier.clear();
+      } catch (e) {}
+      window.recaptchaVerifier = null;
       setUpRecaptcha();
     }
   };
