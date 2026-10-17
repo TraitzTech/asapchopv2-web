@@ -39,6 +39,9 @@ export const store_item_search_api = "/api/v1/items/search";
 export const parcel_delivery_instructions =
   "/api/v1/customer/order/parcel-instructions";
 export const order_place_api = "/api/v1/customer/order/place";
+export const gift_recipient_api = "/api/v1/customer/gift/recipient";
+export const gifts_received_api = "/api/v1/customer/gift/received";
+export const gift_details_api = "/api/v1/customer/gift";
 export const my_orders_api = "/api/v1/customer/order";
 export const monthly_order_list_api = "/api/v1/customer/monthly-order/list";
 export const monthly_order_remove_api = "/api/v1/customer/monthly-order/remove";

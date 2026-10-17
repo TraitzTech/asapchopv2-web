@@ -86,6 +86,7 @@ import { useFormik } from "formik";
 
 import * as Yup from "yup";
 import { useGetTax } from "api-manage/hooks/react-query/order-place/useGetTax";
+import GiftOrderDetails from "./GiftOrderDetails";
 export const deepEqual = (obj1, obj2) => {
   if (obj1 === obj2) return true;
 
@@ -150,6 +151,7 @@ const ItemCheckout = (props) => {
   const [isPackaging, setIsPackaging] = useState(false);
   const [packagingCharge, setPackagingCharge] = useState(0);
   const [paymentMethodImage, setPaymentMethodImage] = useState("");
+  const [giftDetails, setGiftDetails] = useState(null);
   const isInitialCartRender = useRef(true);
   const previousCartListRef = useRef(cartList);
   const [changeAmount, setChangeAmount] = useState();
@@ -188,6 +190,7 @@ const ItemCheckout = (props) => {
   console.log({ couponDiscount });
 
   const currentModuleType = getCurrentModuleType();
+  const giftSupported = [ModuleTypes.FOOD, ModuleTypes.GROCERY, ModuleTypes.ECOMMERCE].includes(currentModuleType);
   const storeId =
     page === "campaign"
       ? campaignItemList?.[0]?.store_id
@@ -428,7 +431,14 @@ const ItemCheckout = (props) => {
       }
 
       formData.append("payment_method", isDigital);
-      formData.append("order_type", orderType);
+      formData.append("order_type", giftDetails ? "delivery" : orderType);
+      if (giftDetails) {
+        formData.append("is_gift", "1");
+        formData.append("gift_recipient_id", giftDetails.recipientId || "");
+        formData.append("gift_card_theme", giftDetails.cardTheme);
+        formData.append("gift_message", giftDetails.message || "");
+        formData.append("gift_is_anonymous", giftDetails.anonymous ? "1" : "0");
+      }
 
       // Delivery-speed selection (express / standard / slightly_delay).
       // Skipped when a free-delivery coupon is applied — surcharge is moot.
@@ -539,7 +549,14 @@ const ItemCheckout = (props) => {
         schedule_at: scheduleAt === "now" ? null : scheduleAt,
         // order_time: scheduleAt,
         payment_method: isDigital,
-        order_type: orderType === "schedule_order" ? "delivery" : orderType,
+        order_type: giftDetails ? "delivery" : orderType === "schedule_order" ? "delivery" : orderType,
+        ...(giftDetails && {
+          is_gift: 1,
+          gift_recipient_id: giftDetails.recipientId,
+          gift_card_theme: giftDetails.cardTheme,
+          gift_message: giftDetails.message || "",
+          gift_is_anonymous: giftDetails.anonymous ? 1 : 0,
+        }),
         store_id: storeId,
         coupon_code: couponDiscount?.code,
         coupon_discount_amount: couponDiscount?.discount,
@@ -610,6 +627,24 @@ const ItemCheckout = (props) => {
   }, [cartList, campaignItemList, couponDiscount, storeData]);
 
   const handlePlaceOrder = () => {
+    if (giftDetails) {
+      if (!token) {
+        toast.error(t("Sign in to send a gift"));
+        return;
+      }
+      if (!giftDetails.recipientId) {
+        toast.error(t("Find and select an Asapchop customer to receive this gift"));
+        return;
+      }
+      if (orderType === "take_away") {
+        toast.error(t("Gift orders can only be delivered"));
+        return;
+      }
+      if (paymentMethod === "cash_on_delivery") {
+        toast.error(t("Choose a payment method other than cash on delivery for a gift"));
+        return;
+      }
+    }
     const itemsList = page === "campaign" ? campaignItemList : cartList;
     const isAvailable =
       storeData?.schedule_order && getCurrentModuleType() === ModuleTypes.FOOD
@@ -1124,6 +1159,13 @@ const ItemCheckout = (props) => {
   }, [isZoneDigital, configData?.cash_on_delivery]);
 
   useEffect(() => {
+    if (giftDetails && paymentMethod === "cash_on_delivery") {
+      setPaymentMethod("");
+      setPaymentMethodImage("");
+    }
+  }, [giftDetails, paymentMethod]);
+
+  useEffect(() => {
     if (isInitialCartRender.current) {
       isInitialCartRender.current = false;
       previousCartListRef.current = cartList;
@@ -1215,6 +1257,17 @@ const ItemCheckout = (props) => {
                 setSelectedDeliveryOption={setSelectedDeliveryOption}
               />
 
+              {giftSupported && token && (
+                <GiftOrderDetails
+                  value={giftDetails}
+                  onChange={(value) => {
+                    setGiftDetails(value);
+                    if (value) setOrderType("delivery");
+                  }}
+                  disabled={orderLoading}
+                />
+              )}
+
               {Number.parseInt(configData?.dm_tips_status) === 1 &&
                 orderType !== "take_away" && (
                   <DeliveryManTip
@@ -1247,7 +1300,7 @@ const ItemCheckout = (props) => {
                   setPaymentMethod={setPaymentMethod}
                   paymentMethod={paymentMethod}
                   zoneData={zoneData}
-                  configData={configData}
+                  configData={giftDetails ? { ...configData, cash_on_delivery: false } : configData}
                   orderType={orderType}
                   usePartialPayment={usePartialPayment}
                   offlinePaymentOptions={offlinePaymentOptions}

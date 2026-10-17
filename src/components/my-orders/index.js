@@ -1,6 +1,6 @@
-import { Grid, Skeleton, useMediaQuery } from "@mui/material";
+import { Button, Grid, Skeleton, Stack, useMediaQuery } from "@mui/material";
+import CardGiftcardOutlinedIcon from "@mui/icons-material/CardGiftcardOutlined";
 import { useTheme } from "@mui/material/styles";
-import { Stack } from "@mui/system";
 import { data_limit } from "api-manage/ApiRoutes";
 import { useEffect, useState } from "react";
 import { toast } from "react-hot-toast";
@@ -19,6 +19,7 @@ import nodata from "../loyalty-points/assets/Search.svg";
 import active from "./assets/active_image.png";
 import past from "./assets/past_image.png";
 import Order, { CustomPaper } from "./order";
+import GiftsInbox from "./GiftsInbox";
 
 const CustomShimmerCard = ({ isXs }) => {
   const theme = useTheme();
@@ -117,6 +118,7 @@ const MyOrders = (props) => {
   const { orderType, currentTab } = useSelector((state) => state.utilsData);
 
   const [offset, setOffSet] = useState(1);
+  const [showGifts, setShowGifts] = useState(false);
   const dispatch = useDispatch();
   const isSmall = useMediaQuery(theme.breakpoints.down("md"));
   const orderTypeValue = orderType === 0 ? "running-orders" : "list";
@@ -194,24 +196,38 @@ const MyOrders = (props) => {
         padding: isSmall ? "10px 10px 10px 10px" : "20px 20px 20px 27px",
       }}
     >
-      <TabsTypeOne
+      {!showGifts && <TabsTypeOne
         tabs={tabsData}
         currentTab={currentTab}
         t={t}
         width="33px !important"
-      />
+      />}
+      <Stack direction="row" spacing={1}>
+        <Button variant={showGifts ? "outlined" : "contained"} onClick={() => setShowGifts(false)}>
+          {t("Orders")}
+        </Button>
+        <Button
+          variant={showGifts ? "contained" : "outlined"}
+          startIcon={<CardGiftcardOutlinedIcon />}
+          onClick={() => setShowGifts(true)}
+        >
+          {t("Gifts")}
+        </Button>
+      </Stack>
       {/*<NavigationButtons t={t} setOffset={setOffSet} />*/}
 
       <CustomStackFullWidth spacing={3}>
-        {handleInnerContent()}
-        {data?.total_size > data_limit && (
-          <CustomPagination
-            total_size={data?.total_size}
-            page_limit={data_limit}
-            offset={offset}
-            setOffset={setOffSet}
-          />
-        )}
+        {showGifts ? <GiftsInbox /> : <>
+          {handleInnerContent()}
+          {data?.total_size > data_limit && (
+            <CustomPagination
+              total_size={data?.total_size}
+              page_limit={data_limit}
+              offset={offset}
+              setOffset={setOffSet}
+            />
+          )}
+        </>}
       </CustomStackFullWidth>
     </CustomStackFullWidth>
   );
